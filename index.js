@@ -22,6 +22,7 @@ async function run() {
         const allProducts = database.collection("products");
         const browseProducts = database.collection("browseProducts");
         const topSale = database.collection("topSale");
+        const ordersCollection = database.collection("orders")
 
         // get all products
         app.get("/products", async (req,res) => {
@@ -58,7 +59,31 @@ async function run() {
             const query = { id : id };
             const result = await allProducts.findOne(query);
             res.send(result);
+        });
+
+        // get and save user orders
+        app.post("/order", async (req,res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.json(result);
+        });
+
+        // get all the orders of users
+        app.get("/orders", async (req,res) => {
+            const cursor = ordersCollection.find({});
+            const result = await cursor.toArray();
+            res.send(result);
         })
+
+
+        // get specific user orders
+        app.get("/orders/:email", async (req,res) => {
+            const userEmail = req.params;
+            const query = {email : userEmail.email};
+            const result = await ordersCollection.find(query).toArray();
+            res.send(result);
+        })
+
     }
 
 
